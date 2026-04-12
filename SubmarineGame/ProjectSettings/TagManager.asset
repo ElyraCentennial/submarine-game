@@ -9,6 +9,7 @@ TagManager:
   - Bubble
   - Gate
   - Hook
+  - Treasure
   layers:
   - Default
   - TransparentFX
