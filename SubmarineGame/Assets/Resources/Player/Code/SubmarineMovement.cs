@@ -11,7 +11,7 @@ public class SubmarineMovement : MonoBehaviour
     private Vector2 m_move_direction;
 
     [SerializeField] private InputActionReference m_move_input;
-    [SerializeField] private InputActionReference m_hook_toggle;
+    // [SerializeField] private InputActionReference m_hook_toggle;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -32,10 +32,12 @@ public class SubmarineMovement : MonoBehaviour
 
     private void FixedUpdate() {
 
-        m_submarine_rb.linearVelocity = new Vector2(
+        Vector2 current_velocity = new Vector2(
                                 m_move_direction.x * m_move_speed,
                                 m_move_direction.y * m_move_speed
                             );
+
+        m_submarine_rb.linearVelocity = current_velocity;
 
     }
 
