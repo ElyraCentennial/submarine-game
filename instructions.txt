@@ -1,0 +1,8 @@
+# Instructions
+
+Move with WASD keys
+Click towards treasures to shoot hook onto treasures
+Click while holding a treasure to release it
+Navigate treasures back to the net in the starting area
+
+Note: concept document available in the Documentation directory!
