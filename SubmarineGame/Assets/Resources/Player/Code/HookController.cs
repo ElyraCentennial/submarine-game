@@ -83,8 +83,15 @@ public class HookController : MonoBehaviour
                     m_hook_end_loc = hook_hit.point;                    // Where the hook connects onto the treasure
                     m_hook_end_loc.z = 0;                               // We don't want to mess with z axis in 2D game
 
-                    m_hook_joint.connectedAnchor = m_hook_end_loc;
-                    // m_hook_joint.connectedBody = m_hook_held_item.GetComponent<Rigidbody2D>();
+                    Rigidbody2D hitRb = m_hook_held_item.GetComponent<Rigidbody2D>();
+                    if (hitRb != null) {
+                        m_hook_joint.connectedBody = hitRb;
+                        m_hook_joint.autoConfigureConnectedAnchor = false;
+                        m_hook_joint.connectedAnchor = m_hook_held_item.transform.InverseTransformPoint(m_hook_end_loc);
+                    } else {
+                        m_hook_joint.connectedBody = null;
+                        m_hook_joint.connectedAnchor = m_hook_end_loc;
+                    }
                     m_hook_joint.enabled = true;
                     m_hook_joint.distance = m_hook_length;
 
@@ -104,6 +111,8 @@ public class HookController : MonoBehaviour
 
                 m_hook_joint.enabled = false;
                 m_hook_rope.enabled = false;
+                m_hook_joint.connectedBody = null;
+                m_hook_is_active = false;
 
             }
 

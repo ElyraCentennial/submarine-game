@@ -13,6 +13,10 @@ public class SubmarineMovement : MonoBehaviour
     [SerializeField] private InputActionReference m_move_input;
     // [SerializeField] private InputActionReference m_hook_toggle;
 
+    [Header("Visuals")]
+    [SerializeField] private ParticleSystem m_bubble_trail;
+    private bool m_is_moving;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -27,6 +31,9 @@ public class SubmarineMovement : MonoBehaviour
     {
 
         m_move_direction = m_move_input.action.ReadValue<Vector2>();
+        m_is_moving = m_move_direction.sqrMagnitude > 0.01f;
+
+        HandleBubbles();
 
     }
 
@@ -39,6 +46,21 @@ public class SubmarineMovement : MonoBehaviour
 
         m_submarine_rb.linearVelocity = current_velocity;
 
+    }
+
+    private void HandleBubbles()
+    {
+        if (m_bubble_trail != null)
+        {
+            if (m_is_moving && !m_bubble_trail.isPlaying)
+            {
+                m_bubble_trail.Play();
+            }
+            else if (!m_is_moving && m_bubble_trail.isPlaying)
+            {
+                m_bubble_trail.Stop();
+            }
+        }
     }
 
 }
