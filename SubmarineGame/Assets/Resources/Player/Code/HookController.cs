@@ -1,129 +1,106 @@
 using UnityEngine;
+using TMPro;
+using System.Collections.Generic;
 
 public class HookController : MonoBehaviour
 {
-
     [SerializeField] private float m_hook_length;
     private Vector3 m_hook_end_loc;
     private DistanceJoint2D m_hook_joint;
     private bool m_hook_is_active;
 
     [SerializeField] private LineRenderer m_hook_rope;
-
     private GameObject m_hook_held_item;
 
-    [SerializeField] private LayerMask m_hookable_layer;    // This would be the treasure layer specifically
+    [SerializeField] private LayerMask m_hookable_layer;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    [Header("UI Display")]
+    [SerializeField] private TextMeshProUGUI m_itemDisplayUI;
+
+    private Dictionary<string, string> m_itemNames = new Dictionary<string, string>();
+
     void Start()
     {
-
         m_hook_joint = this.gameObject.GetComponent<DistanceJoint2D>();
+        m_hook_joint.enabled = false;
+        m_hook_rope.enabled = false;
 
-        m_hook_joint.enabled = false;   // hook not visible until shot
-        m_hook_rope.enabled = false;    // Generate rope only when treasure is held
-
+        m_itemNames.Add("Treasure", "Chest");
     }
 
-    // Update is called once per frame
     void Update()
     {
-
         hookCheck();
-
     }
 
     public bool isHookActive() { return m_hook_is_active; }
 
     public GameObject getHookHeldItem() { return m_hook_held_item; }
 
-    private void setHookRope( Vector3 start_point, Vector3 end_point ) {
-    
+    private void setHookRope(Vector3 start_point, Vector3 end_point)
+    {
         m_hook_rope.SetPosition(0, start_point);
         m_hook_rope.SetPosition(1, end_point);
-
     }
 
-    /* Brief: Toggle hook on and off and connects with target treasure
-     *
-     * - On mouse press:
-     *   - If holding treasure:
-     *      - releases treasure
-     *   - If not holding treasure
-     *      - raycasts for treasure and captures it with a joint connection
-    */
-    private void hookCheck() {
-
-        // If hook isn't already holding an item and mouse is clicked
-        // Shoot raycast to see if we hit a treasure
-        // Grab the treasure and connect a joint to it (to hold it)
-
-        if ( Input.GetMouseButtonDown(0) ) {
-
-            Debug.Log("Mouse button down");
-
-            if ( !m_hook_is_active ) {
-
-                Debug.Log("Hook shot");
-
+    private void hookCheck()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            if (!m_hook_is_active)
+            {
                 RaycastHit2D hook_hit = Physics2D.Raycast(
-
-                    Camera.main.ScreenToWorldPoint(Input.mousePosition),        // origin
-                    Vector2.zero,                                               // direction (not needed)
-                    Mathf.Infinity,                                             // distance
-                    m_hookable_layer                                           // LayerMask
-
+                    Camera.main.ScreenToWorldPoint(Input.mousePosition),
+                    Vector2.zero,
+                    Mathf.Infinity,
+                    m_hookable_layer
                 );
 
-                if ( hook_hit.collider != null ) {
+                if (hook_hit.collider != null)
+                {
+                    m_hook_held_item = hook_hit.collider.gameObject;
+                    m_hook_end_loc = hook_hit.point;
+                    m_hook_end_loc.z = 0;
 
-                    Debug.Log("Hook collided with treasure");
-
-                    m_hook_held_item = hook_hit.collider.gameObject;    // This should be a treasure we want to hold onto
-                    m_hook_end_loc = hook_hit.point;                    // Where the hook connects onto the treasure
-                    m_hook_end_loc.z = 0;                               // We don't want to mess with z axis in 2D game
+                    string itemTag = m_hook_held_item.tag;
+                    if (m_itemNames.ContainsKey(itemTag))
+                    {
+                        m_itemDisplayUI.text = m_itemNames[itemTag];
+                    }
 
                     Rigidbody2D hitRb = m_hook_held_item.GetComponent<Rigidbody2D>();
-                    if (hitRb != null) {
+                    if (hitRb != null)
+                    {
                         m_hook_joint.connectedBody = hitRb;
                         m_hook_joint.autoConfigureConnectedAnchor = false;
                         m_hook_joint.connectedAnchor = m_hook_held_item.transform.InverseTransformPoint(m_hook_end_loc);
-                    } else {
+                    }
+                    else
+                    {
                         m_hook_joint.connectedBody = null;
                         m_hook_joint.connectedAnchor = m_hook_end_loc;
                     }
                     m_hook_joint.enabled = true;
                     m_hook_joint.distance = m_hook_length;
-
                     m_hook_is_active = true;
-
                     setHookRope(m_hook_held_item.transform.position, transform.position);
                     m_hook_rope.enabled = true;
-
                 }
-
             }
-
-            // If the hook is already active (i.e. holding an item)
-            // Then mouse click releases the item
-
-            else {
+            else
+            {
+                if (m_itemDisplayUI != null) m_itemDisplayUI.text = "";
 
                 m_hook_joint.enabled = false;
                 m_hook_rope.enabled = false;
                 m_hook_joint.connectedBody = null;
                 m_hook_is_active = false;
-
             }
-
         }
 
-        if ( m_hook_rope.enabled ) {
-                setHookRope(m_hook_held_item.transform.position, transform.position);
-                // m_hook_joint.anchor = transform.poisition;
-                // m_hook_joint.connectedAnchor = m_hook_held_item.transform.poisition;
+        if (m_hook_rope.enabled)
+        {
+            setHookRope(m_hook_held_item.transform.position, transform.position);
         }
-
     }
-
 }

@@ -11,7 +11,6 @@ public class SubmarineMovement : MonoBehaviour
     private Vector2 m_move_direction;
 
     [SerializeField] private InputActionReference m_move_input;
-    // [SerializeField] private InputActionReference m_hook_toggle;
 
     [Header("Visuals")]
     [SerializeField] private ParticleSystem m_bubble_trail;
